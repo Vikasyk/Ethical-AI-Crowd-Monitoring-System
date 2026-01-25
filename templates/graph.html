@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Density Trends | BMTC Monitor</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fonts/Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .graph-container {
+            width: 100%;
+            height: 100%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation (Simplified) -->
+        <aside class="sidebar glass-panel">
+            <div class="logo-area">
+                <i class="fa-solid fa-chart-line"></i>
+                <h1>Analytics</h1>
+            </div>
+
+            <div class="controls">
+                <a href="/" class="btn btn-primary" style="text-decoration:none;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="route-info">
+                <p style="color:var(--text-muted); font-size:0.9rem;">
+                    Monitoring live density trends over the last 60 seconds.
+                </p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h2>Live Density Analysis</h2>
+                <div class="status-badge">
+                    <span class="dot"></span> Live Data
+                </div>
+            </header>
+
+            <div class="graph-container glass-panel">
+                <div class="chart-wrapper">
+                    <canvas id="densityChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('densityChart').getContext('2d');
+        const densityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Crowd Density (P/m²)',
+                    data: [],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 2
+                },
+                {
+                    label: 'Safety Threshold',
+                    data: [],
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 6,
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#f8fafc' } }
+                }
+            }
+        });
+
+        function updateChart() {
+            fetch('/api/history')
+                .then(res => res.json())
+                .then(data => {
+                    const labels = data.map(d => d.time);
+                    const densities = data.map(d => d.density);
+                    const thresholds = data.map(d => d.threshold);
+
+                    densityChart.data.labels = labels;
+                    densityChart.data.datasets[0].data = densities;
+                    densityChart.data.datasets[1].data = thresholds;
+                    densityChart.update('none'); // 'none' for performance
+                });
+        }
+
+        setInterval(updateChart, 1000);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMTC Crowd Safety Monitor</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo-area">
+                <i class="fa-solid fa-bus-simple"></i>
+                <h1>BMTC Monitor</h1>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="routeSelect"><i class="fa-solid fa-route"></i> Select Route</label>
+                    <div class="select-wrapper">
+                        <select id="routeSelect">
+                            <option value="500-D">Loading routes...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="route-info" id="routeInfo">
+                    <div class="info-item">
+                        <span class="label">From</span>
+                        <span class="value" id="originVal">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">To</span>
+                        <span class="value" id="destVal">--</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Source Selection -->
+                <div class="control-group">
+                    <label><i class="fa-solid fa-video"></i> Video Source</label>
+                    <div class="radio-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <label style="font-size: 0.9rem; cursor: pointer;">
+                            <input type="radio" name="videoSource" value="upload" checked> Upload
+                        </label>
+                        <label style="font-size: 0.9rem; cursor: pointer;">
+                            <input type="radio" name="videoSource" value="webcam"> Webcam
+                        </label>
+                    </div>
+
+                    <!-- File Input for Upload -->
+                    <div id="uploadContainer">
+                        <input type="file" id="videoUpload" accept="video/*"
+                            style="width: 100%; font-size: 0.8rem; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 5px; color: white;">
+                        <small id="uploadStatus" style="display: block; margin-top: 5px; color: #aaa;"></small>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="densitySlider">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                        Max Density (<span id="densityVal">2.0</span> P/m²)
+                    </label>
+                    <input type="range" id="densitySlider" min="0.5" max="5.0" step="0.1" value="2.0">
+                    <small>Standard safety limit ~2-3 P/m²</small>
+                </div>
+
+                <button id="toggleBtn" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i> Start Monitoring
+                </button>
+
+
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-bar">
+                <h2>Ethical Crowd Monitoring System</h2>
+                <div style="display: flex; gap: 15px; align-items: center; margin-left: auto;">
+                    <button onclick="showGraphModal()" class="btn"
+                        style="padding: 8px 16px; background: var(--accent); color: white; border-radius: 20px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-chart-line"></i> Graph
+                    </button>
+
+                    <button onclick="openAlertsWindow()" class="btn"
+                        style="padding: 8px 16px; background: #f59e0b; color: white; border-radius: 20px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Alerts
+                    </button>
+
+                    <div class="status-badge" id="systemStatus">
+                        <span class="dot"></span> System Standby
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Video Feed -->
+                <div class="video-card glass-panel">
+                    <div class="video-wrapper">
+                        <img id="videoFeed" src="" alt="Provide Video Stream" style="display:none;">
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <i class="fa-solid fa-video-slash"></i>
+                            <p>Monitoring Stopped</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics Panel -->
+                <div class="metrics-panel">
+                    <!-- Metric 1 -->
+                    <div class="metric-card glass-panel">
+                        <div class="icon-box blue">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Passengers</h3>
+                            <p class="value" id="passengerCount">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Metric 2 -->
+                    <div class="metric-card glass-panel">
+                        <div class="icon-box purple">
+                            <i class="fa-solid fa-chart-area"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Density</h3>
+                            <p class="value"><span id="densityMetric">0.00</span> <span class="unit">P/m²</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Alert Box -->
+                    <div class="alert-card glass-panel" id="alertCard">
+                        <div class="alert-icon">
+                            <i class="fa-solid fa-circle-check" id="alertIcon"></i>
+                        </div>
+                        <div class="alert-content">
+                            <h4>Status</h4>
+                            <p id="alertMessage">System Ready</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Graph Modal -->
+    <div id="graphModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3>Live Density Trends</h3>
+                <button onclick="closeGraphModal()" class="close-btn"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="densityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        function openGraphWindow() {
+            window.open('/graph', 'GraphWindow', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
+        }
+    </script>
+</body>
+
+</html>

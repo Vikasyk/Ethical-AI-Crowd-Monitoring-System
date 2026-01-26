@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cloud Crowd Alert Dashboard</title>
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #334155;
+            text-align: center;
+        }
+
+        th {
+            background: #1e293b;
+        }
+
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>☁️ Central Crowd Alert Dashboard</h2>
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>System</th>
+            <th>Route</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Density</th>
+        </tr>
+        {% for a in alerts %}
+        <tr>
+            <td>{{ a[8] }}</td>
+            <td>{{ a[1] }}</td>
+            <td>{{ a[2] }}</td>
+            <td>{{ a[3] }}</td>
+            <td>{{ a[4] }}</td>
+            <td class="error">{{ a[5] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+
+</html>
